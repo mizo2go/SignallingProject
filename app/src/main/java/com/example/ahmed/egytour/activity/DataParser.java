@@ -14,16 +14,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class DataParser extends AsyncTask<Void,Void,Boolean> {
 
     Context c;
-    String jsonData;
+    static String jsonData;
     ListView lv;
 
     ProgressDialog pd;
-    ArrayList<String> spacecrafts=new ArrayList<>();
 
+    static ArrayList<String> spacecrafts=new ArrayList<>();
     public DataParser(Context c, String jsonData, ListView lv) {
         this.c = c;
         this.jsonData = jsonData;
@@ -42,7 +45,7 @@ public class DataParser extends AsyncTask<Void,Void,Boolean> {
 
     @Override
     protected Boolean doInBackground(Void... params) {
-        return this.parseData();
+        return this.parseDatandsort();
     }
 
     @Override
@@ -64,25 +67,23 @@ public class DataParser extends AsyncTask<Void,Void,Boolean> {
         }
     }
 
-    private Boolean parseData()
-    {
-        try
-        {
-            JSONArray ja = new JSONArray(jsonData);
+    private Boolean parseDatandsort() {
+        try {
+            JSONArray jsonArr = new JSONArray(jsonData);
             JSONObject jo;
 
             spacecrafts.clear();
+            for (int i = 0; i < jsonArr.length(); i++) {
 
-            for (int i = 0; i < ja.length(); i++) {
+                jo = jsonArr.getJSONObject(i);
 
-                jo = ja.getJSONObject(i);
-
-                String name = jo.getString("name");
-
+                String name = jo.getString("name")+" ";
+                name+=jo.getString("Rating");
                 spacecrafts.add(name);
             }
 
             return true;
+
 
         } catch (JSONException e) {
             e.printStackTrace();
