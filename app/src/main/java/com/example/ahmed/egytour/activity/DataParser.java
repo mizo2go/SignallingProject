@@ -18,15 +18,18 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class DataParser extends AsyncTask<Void,Void,Boolean> {
-
+public class DataParser extends AsyncTask<Void, Void, Boolean> {
+    static String longitude;
+    static String latitude;
+    JSONArray jsonArr;
     Context c;
     static String jsonData;
     ListView lv;
 
     ProgressDialog pd;
 
-    static ArrayList<String> spacecrafts=new ArrayList<>();
+    static ArrayList<String> spacecrafts = new ArrayList<>();
+
     public DataParser(Context c, String jsonData, ListView lv) {
         this.c = c;
         this.jsonData = jsonData;
@@ -37,7 +40,7 @@ public class DataParser extends AsyncTask<Void,Void,Boolean> {
     protected void onPreExecute() {
         super.onPreExecute();
 
-        pd=new ProgressDialog(c);
+        pd = new ProgressDialog(c);
         pd.setTitle("Parse");
         pd.setMessage("Pasring..Please wait");
         pd.show();
@@ -53,15 +56,29 @@ public class DataParser extends AsyncTask<Void,Void,Boolean> {
         super.onPostExecute(result);
 
         pd.dismiss();
-        if(result)
-        {
-            ArrayAdapter adapter=new ArrayAdapter(c,android.R.layout.simple_list_item_1,spacecrafts);
+        if (result) {
+            ArrayAdapter adapter = new ArrayAdapter(c, android.R.layout.simple_list_item_1, spacecrafts);
             lv.setAdapter(adapter);
 
             lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Toast.makeText(c, spacecrafts.get(position), Toast.LENGTH_SHORT).show();
+                    JSONObject jo;
+                    try {
+                        for (int i = 0; i < jsonArr.length(); i++) {
+
+
+                            jo = jsonArr.getJSONObject(i);
+                            if(jo.getString("name").equals(spacecrafts.get(position).substring(0,spacecrafts.get(position).length()-4))){
+                                DataParser.longitude=jo.getString("Longitude");
+                                DataParser.latitude=jo.getString("Latitude");
+                            }
+}
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Toast.makeText(c, spacecrafts.get(position)+ " "+longitude+" "+latitude, Toast.LENGTH_SHORT).show();
+
                 }
             });
         }
@@ -69,7 +86,7 @@ public class DataParser extends AsyncTask<Void,Void,Boolean> {
 
     private Boolean parseDatandsort() {
         try {
-            JSONArray jsonArr = new JSONArray(jsonData);
+            jsonArr = new JSONArray(jsonData);
             JSONObject jo;
 
             spacecrafts.clear();
@@ -78,7 +95,7 @@ public class DataParser extends AsyncTask<Void,Void,Boolean> {
                 jo = jsonArr.getJSONObject(i);
 
                 String name = jo.getString("name")+" ";
-                name+=jo.getString("Rating");
+                name += jo.getString("Rating");
                 spacecrafts.add(name);
             }
 
