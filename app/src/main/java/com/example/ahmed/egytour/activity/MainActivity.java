@@ -18,18 +18,22 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import static com.example.ahmed.egytour.activity.DataParser.jsonArr;
 import static com.example.ahmed.egytour.activity.DataParser.jsonData;
+import static com.example.ahmed.egytour.activity.DataParser.longitude;
 import static com.example.ahmed.egytour.activity.DataParser.spacecrafts;
 import static java.util.Collections.sort;
 
@@ -44,12 +48,12 @@ public class MainActivity extends Activity {
 
     private SQLiteHandler db;
     private SessionManager session;
-
+    static ListView lv;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        final ListView lv= (ListView) findViewById(R.id.lv);
+         lv= (ListView) findViewById(R.id.lv);
 
         sortswitch=(Switch) findViewById(R.id.switch1);
         txtName = (TextView) findViewById(R.id.name);
@@ -85,10 +89,31 @@ public class MainActivity extends Activity {
             }
         });
         btnmap.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+                startActivity(intent);
+            }
+        });
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                JSONObject jo;
+                try {
+                    for (int i = 0; i < jsonArr.length(); i++) {
+
+
+                        jo = jsonArr.getJSONObject(i);
+                        if(jo.getString("name").equals(spacecrafts.get(position).substring(0,spacecrafts.get(position).length()-4))){
+                            DataParser.longitude=jo.getString("Longitude");
+                            DataParser.latitude=jo.getString("Latitude");
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+               // Toast.makeText(c, spacecrafts.get(position)+ " "+longitude+" "+latitude, Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this,MapsActivity.class);
                 startActivity(intent);
             }
         });
@@ -160,6 +185,7 @@ public class MainActivity extends Activity {
 
             }
         });
+
         new Downloader(MainActivity.this,urlAddress,lv).execute();
     }
     public static Object connect(String urlAddress)

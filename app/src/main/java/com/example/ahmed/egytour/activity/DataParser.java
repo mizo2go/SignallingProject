@@ -2,6 +2,7 @@ package com.example.ahmed.egytour.activity;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.view.View;
 import android.widget.AdapterView;
@@ -21,7 +22,7 @@ import java.util.List;
 public class DataParser extends AsyncTask<Void, Void, Boolean> {
     static String longitude;
     static String latitude;
-    JSONArray jsonArr;
+    static JSONArray jsonArr;
     Context c;
     static String jsonData;
     ListView lv;
@@ -60,27 +61,7 @@ public class DataParser extends AsyncTask<Void, Void, Boolean> {
             ArrayAdapter adapter = new ArrayAdapter(c, android.R.layout.simple_list_item_1, spacecrafts);
             lv.setAdapter(adapter);
 
-            lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    JSONObject jo;
-                    try {
-                        for (int i = 0; i < jsonArr.length(); i++) {
 
-
-                            jo = jsonArr.getJSONObject(i);
-                            if(jo.getString("name").equals(spacecrafts.get(position).substring(0,spacecrafts.get(position).length()-4))){
-                                DataParser.longitude=jo.getString("Longitude");
-                                DataParser.latitude=jo.getString("Latitude");
-                            }
-}
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    Toast.makeText(c, spacecrafts.get(position)+ " "+longitude+" "+latitude, Toast.LENGTH_SHORT).show();
-
-                }
-            });
         }
     }
 

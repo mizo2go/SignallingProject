@@ -46,6 +46,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationRequest locationRequest;
     private Location lastlocation;
     private Marker currentLocationmMarker;
+    private Marker Marker;
     public static final int REQUEST_LOCATION_CODE = 99;
     int PROXIMITY_RADIUS = 10000;
     double latitude,longitude;
@@ -117,8 +118,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onLocationChanged(Location location) {
 
+        double lat;
+        double longi;
+
         latitude = location.getLatitude();
         longitude = location.getLongitude();
+        String latitude2= DataParser.latitude;
+        lat = Double.parseDouble(latitude2);
+        String logitude2= DataParser.longitude;
+        longi= Double.parseDouble(logitude2);
+
         lastlocation = location;
         if(currentLocationmMarker != null)
         {
@@ -127,11 +136,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         Log.d("lat = ",""+latitude);
         LatLng latLng = new LatLng(location.getLatitude() , location.getLongitude());
+        LatLng latLng2 = new LatLng(lat , longi);
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
+        MarkerOptions markerOptions2 = new MarkerOptions();
+        markerOptions2.position(latLng2);
         markerOptions.title("Current Location");
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+        markerOptions2.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
         currentLocationmMarker = mMap.addMarker(markerOptions);
+        Marker = mMap.addMarker(markerOptions2);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         mMap.animateCamera(CameraUpdateFactory.zoomBy(10));
 
