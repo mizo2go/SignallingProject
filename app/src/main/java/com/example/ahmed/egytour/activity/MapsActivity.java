@@ -123,11 +123,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         latitude = location.getLatitude();
         longitude = location.getLongitude();
-        String latitude2= DataParser.latitude;
-        lat = Double.parseDouble(latitude2);
-        String logitude2= DataParser.longitude;
-        longi= Double.parseDouble(logitude2);
-
+        if(!DataParser.latitude.equals("")  && !DataParser.longitude.equals("")) {
+            String latitude2 = DataParser.latitude;
+            lat = Double.parseDouble(latitude2);
+            String logitude2 = DataParser.longitude;
+            longi = Double.parseDouble(logitude2);
+            LatLng latLng2 = new LatLng(lat , longi);
+            MarkerOptions markerOptions2 = new MarkerOptions();
+            markerOptions2.position(latLng2);
+            markerOptions2.title(MainActivity.destname);
+            markerOptions2.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+            Marker = mMap.addMarker(markerOptions2);
+        }
         lastlocation = location;
         if(currentLocationmMarker != null)
         {
@@ -136,16 +143,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         Log.d("lat = ",""+latitude);
         LatLng latLng = new LatLng(location.getLatitude() , location.getLongitude());
-        LatLng latLng2 = new LatLng(lat , longi);
+
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
-        MarkerOptions markerOptions2 = new MarkerOptions();
-        markerOptions2.position(latLng2);
+
         markerOptions.title("Current Location");
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-        markerOptions2.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+
         currentLocationmMarker = mMap.addMarker(markerOptions);
-        Marker = mMap.addMarker(markerOptions2);
+
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         mMap.animateCamera(CameraUpdateFactory.zoomBy(10));
 

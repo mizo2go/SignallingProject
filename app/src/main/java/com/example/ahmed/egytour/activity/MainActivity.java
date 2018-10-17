@@ -68,7 +68,7 @@ public class MainActivity extends Activity implements LocationListener {
     static int z;
     static double latitude;
     static double longitude;
-
+    static String destname;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -195,6 +195,7 @@ public class MainActivity extends Activity implements LocationListener {
                         if (jo.getString("name").equals(spacecrafts.get(position).substring(0, spacecrafts.get(position).length() - 4))) {
                             DataParser.longitude = jo.getString("Longitude");
                             DataParser.latitude = jo.getString("Latitude");
+                            destname=jo.getString("name");
                         }
                     }
                 } catch (JSONException e) {
