@@ -1,4 +1,5 @@
 package com.example.ahmed.egytour.activity;
+
 import com.example.ahmed.egytour.R;
 
 import com.example.ahmed.egytour.helper.SQLiteHandler;
@@ -14,9 +15,20 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -37,29 +49,41 @@ import static com.example.ahmed.egytour.activity.DataParser.longitude;
 import static com.example.ahmed.egytour.activity.DataParser.spacecrafts;
 import static java.util.Collections.sort;
 
-public class MainActivity extends Activity {
-    final static String urlAddress="http://192.168.1.2/android_login_api/getplaces.php";
-
+public class MainActivity extends Activity implements LocationListener {
+    final static String urlAddress = "http://192.168.1.2/android_login_api/getplaces.php";
+    protected LocationManager locationManager;
+    protected LocationListener locationListener;
     private Switch sortswitch;
     private TextView txtName;
     private TextView txtEmail;
     private Button btnLogout;
     private Button btnmap;
+    private Button distancebutton;
+
 
     private SQLiteHandler db;
     private SessionManager session;
     static ListView lv;
+    static ArrayList<Float> distances = new ArrayList<>();
+    static int z;
+    static double latitude;
+    static double longitude;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-         lv= (ListView) findViewById(R.id.lv);
 
-        sortswitch=(Switch) findViewById(R.id.switch1);
+
+        lv = (ListView) findViewById(R.id.lv);
+
+        sortswitch = (Switch) findViewById(R.id.switch1);
         txtName = (TextView) findViewById(R.id.name);
         txtEmail = (TextView) findViewById(R.id.email);
         btnLogout = (Button) findViewById(R.id.btnLogout);
         btnmap = (Button) findViewById(R.id.btnmap);
+        distancebutton = (Button) findViewById(R.id.distancebutton);
         // SqLite database handler
         db = new SQLiteHandler(getApplicationContext());
 
@@ -80,7 +104,69 @@ public class MainActivity extends Activity {
         txtName.setText(name);
         txtEmail.setText(email);
 
+        distancebutton.setOnClickListener(new View.OnClickListener() {
+            @TargetApi(Build.VERSION_CODES.KITKAT)
+            @Override
+            public void onClick(View v) {
+                //  MapsActivity map=new MapsActivity();
+
+                try {
+
+
+                    JSONObject jo;
+                    JSONArray jsonArray = new JSONArray(jsonData);
+
+                    spacecrafts.clear();
+                    float[] result = new float[1];
+                    for (int i = 0; i < jsonArray.length(); i++) {
+
+
+                        jo = jsonArray.getJSONObject(i);
+
+
+                        String longi = jo.getString("Longitude");
+
+                        String lat = jo.getString("Latitude");
+                        Location.distanceBetween(latitude, longitude, Double.parseDouble(lat), Double.parseDouble(longi), result);
+                        distances.add(result[0]);
+
+                        // spacecrafts.add(name);
+
+                    }
+                    int k = 0;
+                    while (jsonArray.length() != 0) {
+                        float least = distances.get(0);
+                        z = 0;
+                        for (int j = 0; j < distances.size(); j++) {
+
+                            if (distances.get(j) < least) {
+                                least = distances.get(j);
+                                z = j;
+
+                            }
+
+                        }
+
+                        jo = jsonArray.getJSONObject(z);
+                        String name = jo.getString("name") + " ";
+                        name += jo.getString("Rating");
+                        spacecrafts.add(name);
+                        distances.remove(z);
+                        jsonArray.remove(z);
+                        k++;
+
+                    }
+                    ArrayAdapter adapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, spacecrafts);
+                    lv.setAdapter(adapter);
+                } catch (JSONException e) {
+
+                    e.printStackTrace();
+
+                }
+            }
+        });
         // Logout button click event
+
         btnLogout.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -91,6 +177,8 @@ public class MainActivity extends Activity {
         btnmap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                DataParser.longitude = "";
+                DataParser.latitude = "";
                 Intent intent = new Intent(MainActivity.this, MapsActivity.class);
                 startActivity(intent);
             }
@@ -104,16 +192,16 @@ public class MainActivity extends Activity {
 
 
                         jo = jsonArr.getJSONObject(i);
-                        if(jo.getString("name").equals(spacecrafts.get(position).substring(0,spacecrafts.get(position).length()-4))){
-                            DataParser.longitude=jo.getString("Longitude");
-                            DataParser.latitude=jo.getString("Latitude");
+                        if (jo.getString("name").equals(spacecrafts.get(position).substring(0, spacecrafts.get(position).length() - 4))) {
+                            DataParser.longitude = jo.getString("Longitude");
+                            DataParser.latitude = jo.getString("Latitude");
                         }
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-               // Toast.makeText(c, spacecrafts.get(position)+ " "+longitude+" "+latitude, Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(MainActivity.this,MapsActivity.class);
+                // Toast.makeText(c, spacecrafts.get(position)+ " "+longitude+" "+latitude, Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this, MapsActivity.class);
                 startActivity(intent);
             }
         });
@@ -179,21 +267,34 @@ public class MainActivity extends Activity {
                 }
 
 
-
-                ArrayAdapter adapter=new ArrayAdapter(MainActivity.this,android.R.layout.simple_list_item_1,spacecrafts);
+                ArrayAdapter adapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, spacecrafts);
                 lv.setAdapter(adapter);
 
             }
         });
 
-        new Downloader(MainActivity.this,urlAddress,lv).execute();
+        new Downloader(MainActivity.this, urlAddress, lv).execute();
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+
     }
-    public static Object connect(String urlAddress)
-    {
-        try
-        {
-            URL url=new URL(urlAddress);
-            HttpURLConnection con= (HttpURLConnection) url.openConnection();
+
+    public static Object connect(String urlAddress) {
+        try {
+            URL url = new URL(urlAddress);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
             //SET CON PROPERTIES
             con.setRequestMethod("GET");
@@ -205,11 +306,11 @@ public class MainActivity extends Activity {
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
-            return "Error "+e.getMessage();
+            return "Error " + e.getMessage();
 
         } catch (IOException e) {
             e.printStackTrace();
-            return "Error "+e.getMessage();
+            return "Error " + e.getMessage();
 
         }
     }
@@ -218,7 +319,7 @@ public class MainActivity extends Activity {
     /**
      * Logging out the user. Will set isLoggedIn flag to false in shared
      * preferences Clears the user data from sqlite users table
-     * */
+     */
     private void logoutUser() {
         session.setLogin(false);
 
@@ -230,4 +331,24 @@ public class MainActivity extends Activity {
         finish();
     }
 
+    @Override
+    public void onLocationChanged(Location location) {
+        latitude = location.getLatitude();
+        longitude = location.getLongitude();
+    }
+
+    @Override
+    public void onStatusChanged(String s, int i, Bundle bundle) {
+        Log.d("Latitude", "disable");
+    }
+
+    @Override
+    public void onProviderEnabled(String s) {
+        Log.d("Latitude", "enable");
+    }
+
+    @Override
+    public void onProviderDisabled(String s) {
+        Log.d("Latitude", "disable");
+    }
 }
