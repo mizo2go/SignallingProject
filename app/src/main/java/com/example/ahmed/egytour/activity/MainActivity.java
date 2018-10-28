@@ -50,7 +50,7 @@ import static com.example.ahmed.egytour.activity.DataParser.spacecrafts;
 import static java.util.Collections.sort;
 
 public class MainActivity extends Activity implements LocationListener {
-    final static String urlAddress = "http://192.168.1.2/android_login_api/getplaces.php";
+    final static String urlAddress = "http://192.168.1.4/android_login_api/getplaces.php";
     protected LocationManager locationManager;
     protected LocationListener locationListener;
     private Switch sortswitch;
@@ -69,6 +69,7 @@ public class MainActivity extends Activity implements LocationListener {
     static double latitude;
     static double longitude;
     static String destname;
+    static ArrayList<Integer> logos = new ArrayList();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,7 +116,7 @@ public class MainActivity extends Activity implements LocationListener {
 
                     JSONObject jo;
                     JSONArray jsonArray = new JSONArray(jsonData);
-
+                    logos.clear();
                     spacecrafts.clear();
                     float[] result = new float[1];
                     for (int i = 0; i < jsonArray.length(); i++) {
@@ -151,13 +152,16 @@ public class MainActivity extends Activity implements LocationListener {
                         String name = jo.getString("name") + " ";
                         name += jo.getString("Rating");
                         spacecrafts.add(name);
+                        String logo = jo.getString("Imagepath").toString();
+                        int resID = getResources().getIdentifier(logo, "drawable", getPackageName());
+                        logos.add(resID);
                         distances.remove(z);
                         jsonArray.remove(z);
                         k++;
 
                     }
-                    ArrayAdapter adapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, spacecrafts);
-                    lv.setAdapter(adapter);
+                    CustomAdapter customAdapter = new CustomAdapter(getApplicationContext(), spacecrafts, logos);
+                    lv.setAdapter(customAdapter);
                 } catch (JSONException e) {
 
                     e.printStackTrace();
@@ -195,7 +199,7 @@ public class MainActivity extends Activity implements LocationListener {
                         if (jo.getString("name").equals(spacecrafts.get(position).substring(0, spacecrafts.get(position).length() - 4))) {
                             DataParser.longitude = jo.getString("Longitude");
                             DataParser.latitude = jo.getString("Latitude");
-                            destname=jo.getString("name");
+                            destname = jo.getString("name");
                         }
                     }
                 } catch (JSONException e) {
@@ -251,6 +255,7 @@ public class MainActivity extends Activity implements LocationListener {
                 for (int i = 0; i < jsonArr.length(); i++) {
                     sortedJsonArray.put(jsonValues.get(i));
                 }
+                logos.clear();
                 spacecrafts.clear();
                 for (int i = 0; i < sortedJsonArray.length(); i++) {
 
@@ -261,6 +266,10 @@ public class MainActivity extends Activity implements LocationListener {
                         String name = jo.getString("name") + " ";
                         name += jo.getString("Rating");
                         spacecrafts.add(name);
+                        String logo = jo.getString("Imagepath").toString();
+                        int resID = getResources().getIdentifier(logo, "drawable", getPackageName());
+                        logos.add(resID);
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -268,13 +277,14 @@ public class MainActivity extends Activity implements LocationListener {
                 }
 
 
-                ArrayAdapter adapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, spacecrafts);
-                lv.setAdapter(adapter);
+                CustomAdapter customAdapter = new CustomAdapter(getApplicationContext(), spacecrafts, logos);
+                lv.setAdapter(customAdapter);
 
             }
         });
 
         new Downloader(MainActivity.this, urlAddress, lv).execute();
+
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
 

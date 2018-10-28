@@ -49,14 +49,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Marker Marker;
     public static final int REQUEST_LOCATION_CODE = 99;
     int PROXIMITY_RADIUS = 10000;
-    static double  latitude,longitude;
+    static double latitude, longitude;
+    static LatLng latLng2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-        {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkLocationPermission();
 
         }
@@ -68,23 +69,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch(requestCode)
-        {
+        switch (requestCode) {
             case REQUEST_LOCATION_CODE:
-                if(grantResults.length >0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                {
-                    if(ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION) !=  PackageManager.PERMISSION_GRANTED)
-                    {
-                        if(client == null)
-                        {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        if (client == null) {
                             bulidGoogleApiClient();
                         }
                         mMap.setMyLocationEnabled(true);
                     }
-                }
-                else
-                {
-                    Toast.makeText(this,"Permission Denied" , Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(this, "Permission Denied", Toast.LENGTH_LONG).show();
                 }
         }
     }
@@ -123,12 +118,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         latitude = location.getLatitude();
         longitude = location.getLongitude();
-        if(!DataParser.latitude.equals("")  && !DataParser.longitude.equals("")) {
+        if (!DataParser.latitude.equals("") && !DataParser.longitude.equals("")) {
             String latitude2 = DataParser.latitude;
             lat = Double.parseDouble(latitude2);
             String logitude2 = DataParser.longitude;
             longi = Double.parseDouble(logitude2);
-            LatLng latLng2 = new LatLng(lat , longi);
+            latLng2 = new LatLng(lat, longi);
             MarkerOptions markerOptions2 = new MarkerOptions();
             markerOptions2.position(latLng2);
             markerOptions2.title(MainActivity.destname);
@@ -136,13 +131,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Marker = mMap.addMarker(markerOptions2);
         }
         lastlocation = location;
-        if(currentLocationmMarker != null)
-        {
+        if (currentLocationmMarker != null) {
             currentLocationmMarker.remove();
 
         }
-        Log.d("lat = ",""+latitude);
-        LatLng latLng = new LatLng(location.getLatitude() , location.getLongitude());
+        Log.d("lat = ", "" + latitude);
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
 
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
@@ -151,30 +145,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
 
         currentLocationmMarker = mMap.addMarker(markerOptions);
-
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        if (!DataParser.latitude.equals("") && !DataParser.longitude.equals(""))
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng2));
+        else mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         mMap.animateCamera(CameraUpdateFactory.zoomBy(10));
 
-        if(client != null)
-        {
-            LocationServices.FusedLocationApi.removeLocationUpdates(client,this);
+        if (client != null) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(client, this);
         }
     }
 
 
-
-
-    private String getUrl(double latitude , double longitude , String nearbyPlace)
-    {
+    private String getUrl(double latitude, double longitude, String nearbyPlace) {
 
         StringBuilder googlePlaceUrl = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
-        googlePlaceUrl.append("location="+latitude+","+longitude);
-        googlePlaceUrl.append("&radius="+PROXIMITY_RADIUS);
-        googlePlaceUrl.append("&type="+nearbyPlace);
+        googlePlaceUrl.append("location=" + latitude + "," + longitude);
+        googlePlaceUrl.append("&radius=" + PROXIMITY_RADIUS);
+        googlePlaceUrl.append("&type=" + nearbyPlace);
         googlePlaceUrl.append("&sensor=true");
-        googlePlaceUrl.append("&key="+"AIzaSyBLEPBRfw7sMb73Mr88L91Jqh3tuE4mKsE");
+        googlePlaceUrl.append("&key=" + "AIzaSyBLEPBRfw7sMb73Mr88L91Jqh3tuE4mKsE");
 
-        Log.d("MapsActivity", "url = "+googlePlaceUrl.toString());
+        Log.d("MapsActivity", "url = " + googlePlaceUrl.toString());
 
         return googlePlaceUrl.toString();
     }
@@ -188,30 +179,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
 
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED)
-        {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             LocationServices.FusedLocationApi.requestLocationUpdates(client, locationRequest, this);
         }
     }
 
 
-    public boolean checkLocationPermission()
-    {
-        if(ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION)  != PackageManager.PERMISSION_GRANTED )
-        {
+    public boolean checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.ACCESS_FINE_LOCATION))
-            {
-                ActivityCompat.requestPermissions(this,new String[] {Manifest.permission.ACCESS_FINE_LOCATION },REQUEST_LOCATION_CODE);
-            }
-            else
-            {
-                ActivityCompat.requestPermissions(this,new String[] {Manifest.permission.ACCESS_FINE_LOCATION },REQUEST_LOCATION_CODE);
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_CODE);
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_CODE);
             }
             return false;
 
-        }
-        else
+        } else
             return true;
     }
 

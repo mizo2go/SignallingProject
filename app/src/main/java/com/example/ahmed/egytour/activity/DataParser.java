@@ -10,6 +10,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.ahmed.egytour.R;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import static com.example.ahmed.egytour.activity.MainActivity.logos;
 
 public class DataParser extends AsyncTask<Void, Void, Boolean> {
     static String longitude;
@@ -49,7 +53,7 @@ public class DataParser extends AsyncTask<Void, Void, Boolean> {
 
     @Override
     protected Boolean doInBackground(Void... params) {
-        return this.parseDatandsort();
+        return this.parsedata();
     }
 
     @Override
@@ -58,26 +62,30 @@ public class DataParser extends AsyncTask<Void, Void, Boolean> {
 
         pd.dismiss();
         if (result) {
-            ArrayAdapter adapter = new ArrayAdapter(c, android.R.layout.simple_list_item_1, spacecrafts);
-            lv.setAdapter(adapter);
+            CustomAdapter customAdapter = new CustomAdapter(c, spacecrafts, logos);
+            lv.setAdapter(customAdapter);
 
 
         }
     }
 
-    private Boolean parseDatandsort() {
+    private Boolean parsedata() {
         try {
             jsonArr = new JSONArray(jsonData);
             JSONObject jo;
-
+            logos.clear();
             spacecrafts.clear();
             for (int i = 0; i < jsonArr.length(); i++) {
 
                 jo = jsonArr.getJSONObject(i);
 
-                String name = jo.getString("name")+" ";
+                String name = jo.getString("name") + " ";
                 name += jo.getString("Rating");
                 spacecrafts.add(name);
+                String logo = jo.getString("Imagepath");
+                int resID = c.getResources().getIdentifier(logo, "drawable", c.getPackageName());
+                logos.add(resID);
+
             }
 
             return true;
