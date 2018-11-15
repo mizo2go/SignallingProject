@@ -25,6 +25,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.Rating;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -50,7 +51,7 @@ import static com.example.ahmed.egytour.activity.DataParser.spacecrafts;
 import static java.util.Collections.sort;
 
 public class MainActivity extends Activity implements LocationListener {
-    final static String urlAddress = "http://192.168.1.4/android_login_api/getplaces.php";
+    final static String urlAddress = "http://192.168.1.3/android_login_api/getplaces.php";
     protected LocationManager locationManager;
     protected LocationListener locationListener;
     private Switch sortswitch;
@@ -66,9 +67,14 @@ public class MainActivity extends Activity implements LocationListener {
     static ListView lv;
     static ArrayList<Float> distances = new ArrayList<>();
     static int z;
-    static double latitude;
-    static double longitude;
+    static String latitude;
+    static String longitude;
     static String destname;
+    static String Phonenum;
+    static String Img;
+    static String reviews;
+    static String Rating;
+    static int resID;
     static ArrayList<Integer> logos = new ArrayList();
 
     @Override
@@ -128,8 +134,9 @@ public class MainActivity extends Activity implements LocationListener {
                         String longi = jo.getString("Longitude");
 
                         String lat = jo.getString("Latitude");
-                        Location.distanceBetween(latitude, longitude, Double.parseDouble(lat), Double.parseDouble(longi), result);
-                        distances.add(result[0]);
+                        Location.distanceBetween(/*latitude, longitude,*/ 30.0202437,
+                                31.4949123, Double.parseDouble(lat), Double.parseDouble(longi), result);
+                        distances.add(result[0] / 1000);
 
                         // spacecrafts.add(name);
 
@@ -151,6 +158,7 @@ public class MainActivity extends Activity implements LocationListener {
                         jo = jsonArray.getJSONObject(z);
                         String name = jo.getString("name") + " ";
                         name += jo.getString("Rating");
+                        name += " dist:" + distances.get(z);
                         spacecrafts.add(name);
                         String logo = jo.getString("Imagepath").toString();
                         int resID = getResources().getIdentifier(logo, "drawable", getPackageName());
@@ -181,8 +189,8 @@ public class MainActivity extends Activity implements LocationListener {
         btnmap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DataParser.longitude = "";
-                DataParser.latitude = "";
+                MainActivity.longitude = "";
+                MainActivity.latitude = "";
                 Intent intent = new Intent(MainActivity.this, MapsActivity.class);
                 startActivity(intent);
             }
@@ -192,21 +200,34 @@ public class MainActivity extends Activity implements LocationListener {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 JSONObject jo;
                 try {
+                    String naming = "";
+                    if (spacecrafts.get(position).contains("dist"))
+                        for (int a = 0; a < spacecrafts.get(position).length(); a++) {
+                            if (spacecrafts.get(position).charAt(a) == 'd' && spacecrafts.get(position).charAt(a + 1) == 'i' && spacecrafts.get(position).charAt(a + 2) == 's')
+                                naming = spacecrafts.get(position).substring(0, a - 5);
+                        }
+                    else
+                        naming = spacecrafts.get(position).substring(0, spacecrafts.get(position).length() - 4);
+
                     for (int i = 0; i < jsonArr.length(); i++) {
-
-
                         jo = jsonArr.getJSONObject(i);
-                        if (jo.getString("name").equals(spacecrafts.get(position).substring(0, spacecrafts.get(position).length() - 4))) {
-                            DataParser.longitude = jo.getString("Longitude");
-                            DataParser.latitude = jo.getString("Latitude");
+                        if (jo.getString("name").equals(naming)) {
+                            longitude = jo.getString("Longitude");
+                            latitude = jo.getString("Latitude");
+                            Rating = jo.getString("Rating");
+                            Phonenum = jo.getString("Phone");
+                            Img = jo.getString("Imagepath");
                             destname = jo.getString("name");
+                            reviews=jo.getString("Reviews");
+                            String logo = jo.getString("Imagepath");
+                            resID = getResources().getIdentifier(logo, "drawable", getPackageName());
                         }
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
                 // Toast.makeText(c, spacecrafts.get(position)+ " "+longitude+" "+latitude, Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+                Intent intent = new Intent(MainActivity.this, details.class);
                 startActivity(intent);
             }
         });
@@ -344,8 +365,8 @@ public class MainActivity extends Activity implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
-        latitude = location.getLatitude();
-        longitude = location.getLongitude();
+        latitude = "" + location.getLatitude();
+        longitude = "" + location.getLongitude();
     }
 
     @Override
