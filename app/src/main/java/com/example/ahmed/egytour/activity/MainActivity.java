@@ -156,7 +156,7 @@ public class MainActivity extends Activity implements LocationListener {
                         }
 
                         jo = jsonArray.getJSONObject(z);
-                        String name = jo.getString("name") + " ";
+                        String name = jo.getString("name") + "  ";
                         name += jo.getString("Rating");
                         name += " dist:" + distances.get(z);
                         spacecrafts.add(name);
@@ -201,13 +201,11 @@ public class MainActivity extends Activity implements LocationListener {
                 JSONObject jo;
                 try {
                     String naming = "";
-                    if (spacecrafts.get(position).contains("dist"))
+
                         for (int a = 0; a < spacecrafts.get(position).length(); a++) {
-                            if (spacecrafts.get(position).charAt(a) == 'd' && spacecrafts.get(position).charAt(a + 1) == 'i' && spacecrafts.get(position).charAt(a + 2) == 's')
-                                naming = spacecrafts.get(position).substring(0, a - 5);
+                            if (spacecrafts.get(position).charAt(a) == ' ' && spacecrafts.get(position).charAt(a + 1) == ' ')
+                                naming = spacecrafts.get(position).substring(0, a);
                         }
-                    else
-                        naming = spacecrafts.get(position).substring(0, spacecrafts.get(position).length() - 4);
 
                     for (int i = 0; i < jsonArr.length(); i++) {
                         jo = jsonArr.getJSONObject(i);
@@ -284,7 +282,7 @@ public class MainActivity extends Activity implements LocationListener {
                         jo = sortedJsonArray.getJSONObject(i);
 
 
-                        String name = jo.getString("name") + " ";
+                        String name = jo.getString("name") + "  ";
                         name += jo.getString("Rating");
                         spacecrafts.add(name);
                         String logo = jo.getString("Imagepath").toString();

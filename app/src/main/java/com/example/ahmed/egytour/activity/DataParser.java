@@ -79,7 +79,7 @@ public class DataParser extends AsyncTask<Void, Void, Boolean> {
 
                 jo = jsonArr.getJSONObject(i);
 
-                String name = jo.getString("name") + " ";
+                String name = jo.getString("name") + "  ";
                 name += jo.getString("Rating");
                 spacecrafts.add(name);
                 String logo = jo.getString("Imagepath");

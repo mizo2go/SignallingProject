@@ -36,7 +36,7 @@ public class BackgroundTask extends AsyncTask<String,Void,String> {
         if (method.equals("review")) {
             String place = params[1];
             String review = params[2];
-
+            String rating = params[3];
             try {
                 URL url = new URL(postreview);
                 HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
@@ -46,7 +46,8 @@ public class BackgroundTask extends AsyncTask<String,Void,String> {
                 OutputStream OS = httpURLConnection.getOutputStream();
                 BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(OS, "UTF-8"));
                 String data = URLEncoder.encode("place", "UTF-8") + "=" + URLEncoder.encode(place, "UTF-8") + "&" +
-                        URLEncoder.encode("review", "UTF-8") + "=" + URLEncoder.encode(review, "UTF-8");
+                        URLEncoder.encode("review", "UTF-8") + "=" + URLEncoder.encode(review, "UTF-8") + "&" +
+                        URLEncoder.encode("rating", "UTF-8") + "=" + URLEncoder.encode(rating, "UTF-8");
                 bufferedWriter.write(data);
                 bufferedWriter.flush();
                 bufferedWriter.close();
