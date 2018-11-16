@@ -31,7 +31,7 @@ public class BackgroundTask extends AsyncTask<String,Void,String> {
     }
     @Override
     protected String doInBackground(String... params) {
-        String postreview = "http://192.168.1.3/android_login_api/Reviews.php";
+        String postreview = "http://192.168.1.7/android_login_api/Reviews.php";
         String method = params[0];
         if (method.equals("review")) {
             String place = params[1];

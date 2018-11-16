@@ -51,7 +51,7 @@ import static com.example.ahmed.egytour.activity.DataParser.spacecrafts;
 import static java.util.Collections.sort;
 
 public class MainActivity extends Activity implements LocationListener {
-    final static String urlAddress = "http://192.168.1.3/android_login_api/getplaces.php";
+    final static String urlAddress = "http://192.168.1.7/android_login_api/getplaces.php";
     protected LocationManager locationManager;
     protected LocationListener locationListener;
     private Switch sortswitch;
